@@ -1,0 +1,188 @@
+1. Users
+   User
+   id (Primary Key)
+   name
+   email (Unique)
+   password (Hashed)
+   phone_number
+   address
+   role (e.g., Customer, RestaurantOwner, Admin)
+   created_at
+   updated_at
+
+2. Restaurants
+   Restaurant
+   id (Primary Key)
+   name
+   address
+   phone_number
+   email
+   latitude
+   longitude
+   description
+   opening_hours
+   created_at
+   updated_at
+
+3. Menus
+   
+Menu
+
+id (Primary Key)
+restaurant_id (Foreign Key to Restaurant)
+name (e.g., Breakfast, Lunch, Dinner)
+description
+menu_items:[]
+created_at
+updated_at
+
+MenuItem
+id (Primary Key)
+name
+description
+price
+category (e.g., Appetizer, Main Course, Dessert)
+image_url
+created_at
+updated_at 
+
+4. Orders
+
+Order
+id (Primary Key)
+user_id (Foreign Key to User)
+restaurant_id (Foreign Key to Restaurant)
+total_amount
+status (e.g., Pending, Confirmed, Delivered, Canceled)
+order_time
+delivery_time
+created_at
+updated_at
+
+OrderItem
+id (Primary Key)
+order_id (Foreign Key to Order)
+menu_item_id (Foreign Key to MenuItem)
+quantity
+price
+created_at
+updated_at 
+
+5. Reviews
+
+Review
+id (Primary Key)
+user_id (Foreign Key to User)
+restaurant_id (Foreign Key to Restaurant)
+rating (e.g., 1-5)
+comment
+created_at
+updated_at 
+
+6. Reservations
+
+Reservation
+id (Primary Key)
+user_id (Foreign Key to User)
+restaurant_id (Foreign Key to Restaurant)
+reservation_time
+number_of_people
+status (e.g., Confirmed, Canceled)
+created_at
+updated_at 
+
+7. Delivery
+
+Delivery
+id (Primary Key)
+order_id (Foreign Key to Order)
+delivery_person_id (Foreign Key to User who is a Delivery Person)
+delivery_status (e.g., Out for Delivery, Completed, Failed)
+delivery_time
+created_at
+updated_at 
+
+8. Admin
+
+Admin
+id (Primary Key)
+name
+email (Unique)
+password (Hashed)
+created_at
+updated_at
+
+
+###### API ######
+1. User Authentication & Management
+POST /api/auth/register: Register a new user (customer or restaurant owner).
+POST /api/auth/login: Login a user (could include password or OTP-based login).
+POST /api/auth/logout: Logout the current user.
+POST /api/auth/forgot-password: Send password reset link or code.
+POST /api/auth/reset-password: Reset the user's password.
+GET /api/user/profile: Get the logged-in user's profile details.
+PUT /api/user/profile: Update the user's profile information.
+
+2. Restaurant Management
+GET /api/restaurants: Fetch a list of all available restaurants.
+GET /api/restaurants/:id: Get details of a specific restaurant by its ID.
+POST /api/restaurants: Add a new restaurant (for restaurant owners).
+PUT /api/restaurants/:id: Update restaurant information (name, location, description, etc.).
+DELETE /api/restaurants/:id: Delete a restaurant (restaurant owner/admin).
+GET /api/restaurants/top-picks: Fetch top-rated or recommended restaurants.
+
+3. Menu & Dishes
+GET /api/restaurants/:id/menu: Get the menu of a specific restaurant.
+POST /api/restaurants/:id/menu: Add a new dish to a restaurant's menu (restaurant owner).
+PUT /api/restaurants/:id/menu/:menuId: Update dish details (name, description, price, etc.).
+DELETE /api/restaurants/:id/menu/:menuId: Delete a dish from the restaurant’s menu.
+
+4. Restaurant Categories & Cuisine
+GET /api/categories: Fetch all available restaurant categories or cuisines.
+POST /api/categories: Add a new restaurant category or cuisine (admin).
+PUT /api/categories/:id: Update an existing category or cuisine.
+DELETE /api/categories/:id: Delete a category or cuisine.
+
+5. Search & Filters
+GET /api/restaurants/search?q={query}: Search restaurants based on query (name, location, etc.).
+GET /api/restaurants/filter?location={city}&cuisine={cuisine}: Filter restaurants by location, cuisine, or other criteria.
+GET /api/restaurants/:id/reviews: Get all reviews for a specific restaurant.
+
+6. Orders
+POST /api/orders: Place a new order.
+GET /api/orders/:id: Get details of a specific order.
+PUT /api/orders/:id/cancel: Cancel an order.
+GET /api/orders/user/:userId: Fetch all orders made by a specific user.
+GET /api/orders/restaurant/:restaurantId: Fetch all orders for a specific restaurant (restaurant owners).
+
+7. Reviews & Ratings
+POST /api/restaurants/:id/review: Add a review for a restaurant.
+PUT /api/restaurants/:id/review/:reviewId: Update an existing review.
+DELETE /api/restaurants/:id/review/:reviewId: Delete a review.
+
+8. Promotions & Discounts
+GET /api/promotions: Get all available promotions.
+POST /api/promotions: Create a new promotion (admin or restaurant owner).
+PUT /api/promotions/:id: Update a promotion.
+DELETE /api/promotions/:id: Delete a promotion.
+
+9. Reservations (Optional)
+POST /api/reservations: Make a reservation at a restaurant.
+GET /api/reservations/:id: Get details of a specific reservation.
+PUT /api/reservations/:id/cancel: Cancel a reservation.
+GET /api/reservations/user/:userId: Get reservations for a specific user.
+GET /api/reservations/restaurant/:restaurantId: Get all reservations for a specific restaurant.
+
+10. Delivery (Optional)
+POST /api/delivery: Initiate a delivery request for an order.
+GET /api/delivery/:id/status: Get the current status of a delivery.
+PUT /api/delivery/:id/update: Update the delivery status (in-progress, delivered, etc.).
+
+11. Payment
+POST /api/payment: Initiate a payment for an order.
+GET /api/payment/:id/status: Get the status of a specific payment.
+ 
+12. Favorites & Wishlist
+POST /api/favorites/:restaurantId: Add a restaurant to the user's favorites.
+DELETE /api/favorites/:restaurantId: Remove a restaurant from favorites.
+GET /api/favorites: Get the user's favorite restaurants.

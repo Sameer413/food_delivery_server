@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model restaurants {
+  restaurant_id   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String?   @db.VarChar
+  owner_id        String?   @db.Uuid
+  phone_number    String?   @db.VarChar
+  email           String?   @db.VarChar
+  description     String?
+  restaurant_type String?
+  cuisines        String?   @db.VarChar
+  opening_hours   String?
+  closing_hour    String?
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime? @default(now()) @db.Timestamp(6)
+  rating          Float?    @db.Real
+  address_id      String?   @db.Uuid
+  menu            menu[]
+  orders          orders[]
+  address         address?  @relation(fields: [address_id], references: [address_id], onDelete: NoAction)
+  user            user?     @relation(fields: [owner_id], references: [user_id], onDelete: NoAction)
+  reviews         reviews[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user {
+  user_id       String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  email         String?       @unique
+  password      String?
+  phone_number  String?       @unique
+  user_type     String?       @default("customer")
+  updated_at    DateTime?     @db.Timestamp(6)
+  name          String?
+  refresh_token String?
+  address_id    String?       @db.Uuid
+  orders        orders[]
+  payments      payments[]
+  restaurants   restaurants[]
+  reviews       reviews[]
+  address       address?      @relation(fields: [address_id], references: [address_id], onDelete: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model menu {
+  menu_id       String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  restaurant_id String      @db.Uuid
+  name          String?     @db.VarChar
+  description   String?
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime?   @default(now()) @db.Timestamp(6)
+  restaurants   restaurants @relation(fields: [restaurant_id], references: [restaurant_id], onDelete: NoAction)
+  menuItems     menuItems[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model menuItems {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  menu_id      String?       @db.Uuid
+  name         String?
+  description  String?
+  price        String?       @db.VarChar
+  category     String?       @db.VarChar
+  image_url    String?
+  created_at   DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime?     @db.Timestamp(6)
+  isVeg        Boolean?      @default(false)
+  availability Boolean?      @default(true)
+  menu         menu?         @relation(fields: [menu_id], references: [menu_id], onDelete: NoAction, onUpdate: NoAction)
+  order_items  order_items[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model order_items {
+  order_item_id String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id      String     @db.Uuid
+  menu_item_id  String?    @db.Uuid
+  quantity      BigInt?
+  price         BigInt?
+  total         BigInt?
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  menuItems     menuItems? @relation(fields: [menu_item_id], references: [id], onDelete: NoAction)
+  orders        orders     @relation(fields: [order_id], references: [order_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model orders {
+  order_id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id             String?       @db.Uuid
+  restaurant_id       String?       @db.Uuid
+  total_amount        String?
+  order_status        String?       @default("Pending") @db.VarChar
+  payment_status      String?       @default("Unpaid") @db.VarChar
+  created_at          DateTime      @default(now()) @db.Timestamptz(6)
+  delivery_address_id String?       @db.Uuid
+  order_items         order_items[]
+  address             address?      @relation(fields: [delivery_address_id], references: [address_id], onDelete: NoAction, onUpdate: NoAction)
+  restaurants         restaurants?  @relation(fields: [restaurant_id], references: [restaurant_id], onDelete: NoAction, onUpdate: NoAction)
+  user                user?         @relation(fields: [user_id], references: [user_id], onDelete: NoAction)
+  payments            payments[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model reviews {
+  review_id     String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String?      @db.Uuid
+  restuarant_id String?      @db.Uuid
+  rating        BigInt?
+  comments      String?
+  created_at    DateTime     @default(now()) @db.Timestamptz(6)
+  restaurants   restaurants? @relation(fields: [restuarant_id], references: [restaurant_id], onDelete: NoAction)
+  user          user?        @relation(fields: [user_id], references: [user_id], onDelete: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model address {
+  address_id  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  state       String?       @db.VarChar
+  city        String?       @db.VarChar
+  street      String?
+  postal_code String?
+  country     String?       @db.VarChar
+  latitude    Float?        @default(0) @db.Real
+  longitude   Float?        @default(0) @db.Real
+  created_at  DateTime      @default(now()) @db.Timestamptz(6)
+  orders      orders[]
+  restaurants restaurants[]
+  user        user[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model payments {
+  payment_id     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id       String?   @db.Uuid
+  user_id        String?   @db.Uuid
+  amount         String?
+  currency       String?   @db.VarChar
+  payment_status String?   @default("pending") @db.VarChar
+  payment_method String?   @default("paypal") @db.VarChar
+  transaction_id String?
+  payer_email    String?   @db.VarChar
+  payment_date   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
+  orders         orders?   @relation(fields: [order_id], references: [order_id], onDelete: NoAction)
+  user           user?     @relation(fields: [user_id], references: [user_id], onDelete: NoAction)
+}
